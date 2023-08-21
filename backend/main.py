@@ -42,6 +42,8 @@ prefectures = [
 ]
 
 # DBからデータ取得
+
+
 def get_weather_from_mysql(city: str):
     try:
         # MySQL接続
@@ -49,7 +51,7 @@ def get_weather_from_mysql(city: str):
         cursor = connection.cursor()
 
         # MySQLから天気情報取得
-        query = "SELECT weather,iconImage FROM weatherForecast WHERE prefecture = %s"
+        query = "SELECT weather,iconImage,temp,temp_max,temp_min FROM weatherForecast WHERE prefecture = %s"
         cursor.execute(query, (city,))
         result = cursor.fetchall()
         return result
@@ -75,6 +77,7 @@ def get_weather_from_api(city: str):
             },
         )
         weather_data = response.json()
+        # print(weather_data)
         return weather_data
 
     except requests.RequestException as err:
@@ -85,12 +88,27 @@ def insert_weather_into_db(city: str, weather_data: dict):
     try:
         connection = mysql.connector.connect(**db_config)
         cursor = connection.cursor()
-        # MySQLに天気情報を挿入
-        insert_query = "INSERT INTO weatherForecast (prefecture, weather, iconImage) VALUES (%s, %s, %s)"
-        # print("weather_data", weather_data)
-        insert_values = (
-            city, weather_data['weather'][0]['description'], weather_data['weather'][0]['icon'])
-        cursor.execute(insert_query, insert_values)
+
+      # MySQLに天気情報を挿入
+        query = "SELECT COUNT(*) FROM weatherForecast WHERE prefecture = %s"
+        cursor.execute(query, (city,))
+        count = cursor.fetchone()[0]
+
+        if count > 0:
+            # 天気情報アップデート
+            update_query = "UPDATE weatherForecast SET weather = %s, iconImage = %s, updatedAt = NOW(), temp = %s, temp_max = %s, temp_min = %s WHERE prefecture = %s"
+            update_values = (
+                weather_data['weather'][0]['description'], weather_data['weather'][0]['icon'],
+                weather_data['main']['temp'], weather_data['main']['temp_max'], weather_data['main']['temp_min'], city)
+            cursor.execute(update_query, update_values)
+        else:
+            # 天気情報がなかった場合はインサート
+            insert_query = "INSERT INTO weatherForecast (prefecture, weather, iconImage, temp, temp_max, temp_min, createdAt, updatedAt) VALUES (%s, %s, %s, %s, %s, %s, NOW(), NOW())"
+            insert_values = (
+                city, weather_data['weather'][0]['description'], weather_data['weather'][0]['icon'],
+                weather_data['main']['temp'], weather_data['main']['temp_max'], weather_data['main']['temp_min'])
+            cursor.execute(insert_query, insert_values)
+
         connection.commit()
 
     except mysql.connector.Error as err:
@@ -108,7 +126,7 @@ for city in prefectures:
         # 天気APIからデータ取得
         weather_data = get_weather_from_api(city)
 
-        # データベースにインサート
+        # データベースにインサートまたはアップデート
         insert_weather_into_db(city, weather_data)
 
     except Exception as err:
@@ -129,55 +147,9 @@ def get_weather(city: str):
 def get_weatherAPI(city: str):
     try:
         result_from_api = get_weather_from_api(city)
+        print(result_from_api)
         insert_weather_into_db(city, result_from_api)
         return {"weather_from_api": result_from_api}
 
     except (mysql.connector.Error, requests.RequestException) as err:
         return {"error": str(err)}
-
-
-# @app.get("/")
-# def Hello():
-#     return {"Hello": "World!"}
-
-
-# @app.get("/weather")
-# def get_weather(city: str):
-#     try:
-#         # MySQL接続
-#         connection = mysql.connector.connect(**db_config)
-#         cursor = connection.cursor()
-
-#         # MySQLから天気情報取得
-#         query = "SELECT weather FROM weatherForecast WHERE prefecture = %s"
-#         cursor.execute(query, (city,))
-#         result = cursor.fetchall()
-
-#         # OpenWeatherMap APIから天気情報取得
-#         response = requests.get(
-#             "https://api.openweathermap.org/data/2.5/weather",
-#             params={
-#                 "q": city,  # 都市名で取得
-#                 "appid": API_TOKEN,
-#                 "units": "metric",
-#                 "lang": "ja",
-#             },
-#         )
-
-#         weather_data = response.json()
-#         # print(weather_data.weather[0])
-
-#         # MySQLに天気情報を挿入
-#         # insert_query = "INSERT INTO weatherForecast (prefecture, weather) VALUES (%s, %s)"
-#         # insert_values = (city, json.dumps(weather_data))
-#         # cursor.execute(insert_query, insert_values)
-#         # connection.commit()
-#         return {"weather_from_mysql": result, "weather_from_api": weather_data}
-
-#     except mysql.connector.Error as err:
-#         return {"error": str(err)}
-
-#     finally:
-#         if connection.is_connected():
-#             cursor.close()
-#             connection.close()

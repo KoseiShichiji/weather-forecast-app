@@ -66,6 +66,7 @@ function App() {
       const response = await axios.get(`${url}/weather?city=${city}`);
       // console.log("response", response.data.result_from_mysql);
       // console.log("response1", response.data.result_from_mysql[0]);
+      console.log("response", response.data.result_from_mysql);
       setData(response.data.result_from_mysql);
     } catch (error) {
       console.error("Error fetching data:", error);
@@ -76,16 +77,6 @@ function App() {
   const getIconUrl = (iconCode) => {
     return `http://openweathermap.org/img/w/${iconCode}.png`;
   };
-
-  //APIからデータ取得
-  // const GetApiData = async () => {
-  //   try {
-  //     const response = await axios.get(`${url}/weatherAPI?city=${city}`);
-  //     console.log("response", response.data.result_from_api);
-  //   } catch (error) {
-  //     console.error("Error fetching data:", error);
-  //   }
-  // };
 
   return (
     <div
@@ -114,6 +105,7 @@ function App() {
           {data[0][1] && (
             <img src={getIconUrl(data[0][1])} alt="Weather Icon" />
           )}
+          <p>最高気温: {data[0][3]}度</p> <p>最低気温: {data[0][4]}度</p>{" "}
         </div>
       ) : null}
     </div>
