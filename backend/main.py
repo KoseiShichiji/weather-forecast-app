@@ -77,7 +77,6 @@ def get_weather_from_api(city: str):
             },
         )
         weather_data = response.json()
-        # print(weather_data)
         return weather_data
 
     except requests.RequestException as err:
@@ -138,18 +137,6 @@ def get_weather(city: str):
     try:
         result_from_mysql = get_weather_from_mysql(city)
         return {"result_from_mysql": result_from_mysql}
-
-    except (mysql.connector.Error, requests.RequestException) as err:
-        return {"error": str(err)}
-
-
-@app.get("/weatherAPI")
-def get_weatherAPI(city: str):
-    try:
-        result_from_api = get_weather_from_api(city)
-        print(result_from_api)
-        insert_weather_into_db(city, result_from_api)
-        return {"weather_from_api": result_from_api}
 
     except (mysql.connector.Error, requests.RequestException) as err:
         return {"error": str(err)}

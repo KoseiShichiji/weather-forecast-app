@@ -4,7 +4,6 @@ import axios from "axios";
 function App() {
   const [data, setData] = React.useState();
   const [city, setCity] = useState("");
-  // const [city, setSelectedPrefecture] = useState("");
   const url = "http://127.0.0.1:8000";
 
   const prefectures = [
@@ -64,9 +63,6 @@ function App() {
   const GetData = async () => {
     try {
       const response = await axios.get(`${url}/weather?city=${city}`);
-      // console.log("response", response.data.result_from_mysql);
-      // console.log("response1", response.data.result_from_mysql[0]);
-      console.log("response", response.data.result_from_mysql);
       setData(response.data.result_from_mysql);
     } catch (error) {
       console.error("Error fetching data:", error);
@@ -88,7 +84,6 @@ function App() {
         minHeight: "50vh",
       }}
     >
-      {/* <button onClick={GetApiData}>データインサート</button> */}
       <div>天気予報</div>
       <select value={city} onChange={handleSelectChange}>
         <option>都道府県を選択してください</option>
