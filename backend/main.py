@@ -91,6 +91,7 @@ def get_weather_from_api(city: str):
 
 
 def insert_weather_into_db(city: str, weather_data: dict):
+    connection = None  # 初期化
     try:
         connection = mysql.connector.connect(**db_config)
         cursor = connection.cursor()
@@ -121,7 +122,7 @@ def insert_weather_into_db(city: str, weather_data: dict):
         raise err
 
     finally:
-        if connection.is_connected():
+        if connection is not None and connection.is_connected():
             cursor.close()
             connection.close()
 
