@@ -45,6 +45,8 @@ prefectures = [
 
 
 def get_weather_from_mysql(city: str):
+    # 初期化
+    connection = None
     try:
         # MySQL接続
         connection = mysql.connector.connect(**db_config)
@@ -58,9 +60,8 @@ def get_weather_from_mysql(city: str):
 
     except mysql.connector.Error as err:
         raise err
-
     finally:
-        if connection.is_connected():
+        if connection is not None and connection.is_connected():
             cursor.close()
             connection.close()
 
