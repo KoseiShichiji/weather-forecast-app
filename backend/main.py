@@ -42,9 +42,9 @@ prefectures = [
 ]
 
 # DBからデータ取得
-
-
 def get_weather_from_mysql(city: str):
+    # 初期化
+    connection = None
     try:
         # MySQL接続
         connection = mysql.connector.connect(**db_config)
@@ -58,13 +58,14 @@ def get_weather_from_mysql(city: str):
 
     except mysql.connector.Error as err:
         raise err
-
     finally:
-        if connection.is_connected():
+        if connection is not None and connection.is_connected():
             cursor.close()
             connection.close()
 
 # 天気APIからデータ取得
+
+
 def get_weather_from_api(city: str):
     try:
         response = requests.get(
@@ -83,6 +84,8 @@ def get_weather_from_api(city: str):
         raise err
 
 # 天気予報を取得してDBにインサート
+
+
 def insert_weather_into_db(city: str, weather_data: dict):
     try:
         connection = mysql.connector.connect(**db_config)
