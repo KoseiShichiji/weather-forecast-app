@@ -21,7 +21,7 @@ app.add_middleware(
 
 # MySQL接続情報
 db_config = {
-    "host": "localhost",
+    "host": "43.207.162.160",
     "user": "root",
     "password": "xquk59",
     "database": "weatherForecast",
