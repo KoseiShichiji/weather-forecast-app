@@ -9,6 +9,7 @@ app = FastAPI()
 
 origins = [
     "http://localhost:3000",
+    "http://43.207.162.160",
 ]
 
 app.add_middleware(
@@ -21,6 +22,7 @@ app.add_middleware(
 
 # MySQL接続情報
 db_config = {
+    # "host": "localhost",
     "host": "43.207.162.160",
     "user": "root",
     "password": "xquk59",
@@ -42,6 +44,8 @@ prefectures = [
 ]
 
 # DBからデータ取得
+
+
 def get_weather_from_mysql(city: str):
     # 初期化
     connection = None
